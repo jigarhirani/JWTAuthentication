@@ -21,20 +21,8 @@ namespace JWTAuthentication.Controllers
         }
         #endregion
 
-        #region Authentication Using Static Data 
-        private Users Authentication(Users users)
-        {
-            Users _user = null;
-            if (users.UserName == "admin" && users.Password == "1234")
-            {
-                _user = new Users { UserName = "Blind Basic" };
-            }
-            return _user;
-        }
-        #endregion        
-
         #region Generate Token(Preparation)
-        private string GenerateToken(Users users)
+        private string GenerateToken()
         {
             var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securitykey, SecurityAlgorithms.HmacSha256);
@@ -46,21 +34,20 @@ namespace JWTAuthentication.Controllers
         }
         #endregion
 
-        #region Login Using Static Data
+        #region Authentication Using Static Data
         [AllowAnonymous]
         [HttpPost("LoginStatic")]
         public IActionResult LoginStatic(Users users)
         {
             IActionResult response = Unauthorized();
-            var _user = Authentication(users);
-            if (_user != null)
+            if (users.UserName == "admin" && users.Password == "1234")
             {
-                var token = GenerateToken(_user);
+                var token = GenerateToken();
                 response = Ok(new { token = token });
             }
             return response;
         }
-        #endregion
+        #endregion                
 
         #region Login Using Database
         [AllowAnonymous]
@@ -104,7 +91,7 @@ namespace JWTAuthentication.Controllers
                         data.Add("Email", dr["Email"].ToString());
                     }
                     //Prepare Token 
-                    var token = GenerateToken(users);
+                    var token = GenerateToken();
 
                     response.Add("status", "success");
                     response.Add("token", token);
